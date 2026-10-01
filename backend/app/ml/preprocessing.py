@@ -44,7 +44,7 @@ def load_dataset() -> pd.DataFrame:
 
     df = pd.read_excel(
         DATASET_PATH,
-        sheet_name="Table 1"
+        sheet_name=0,
     )
 
     return df
