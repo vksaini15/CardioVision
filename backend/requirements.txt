@@ -1,0 +1,8 @@
+# Web server
+fastapi
+uvicorn[standard]
+
+# Data + ML (uncomment/add as you need them)
+# numpy
+# pandas
+# scikit-learn
