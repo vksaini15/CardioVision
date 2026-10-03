@@ -1,11 +1,34 @@
-"""Entry point of the backend.
-
-This is where the web server starts. Right now it only creates an empty
-app. Routes (URLs the frontend can call) will be added later.
-
-Run it (from the backend/ folder) with:
-    uvicorn app.main:app --reload
-"""
 from fastapi import FastAPI
 
-app = FastAPI(title="Hackathon Project API")
+from app.api.predictions import router as prediction_router
+
+
+app = FastAPI(
+    title="CardioVision API",
+    description=(
+        "Cardiovascular risk prediction "
+        "and visualization backend."
+    ),
+    version="1.0.0",
+)
+
+
+app.include_router(
+    prediction_router
+)
+
+
+@app.get("/")
+def root():
+
+    return {
+        "message": "CardioVision API is running"
+    }
+
+
+@app.get("/health")
+def health():
+
+    return {
+        "status": "healthy"
+    }
