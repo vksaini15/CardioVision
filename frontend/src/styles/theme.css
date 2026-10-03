@@ -1,0 +1,49 @@
+/* Design tokens for CardioVision.
+   Change colours, type and spacing here; components only use these variables. */
+
+:root {
+  /* Surfaces */
+  --cv-bg: #0d1722;
+  --cv-surface: #132130;
+  --cv-surface-raised: #192a3b;
+  --cv-line: #2a3e52;
+  --cv-line-soft: #1f3144;
+
+  /* Text */
+  --cv-text: #e8eff5;
+  --cv-text-muted: #93a6b8;
+  --cv-text-faint: #6c8196;
+
+  /* Brand accent (interface only; never used for risk levels) */
+  --cv-accent: #6fd3c6;
+  --cv-accent-strong: #8ee3d7;
+  --cv-accent-ink: #06201d;
+
+  /* Status colours (system state; risk colours are added with the real results) */
+  --cv-status-standby: #f2b84b;
+  --cv-status-loading: #7cb7ff;
+  --cv-status-ready: #5fd39a;
+  --cv-status-error: #f26b6b;
+
+  /* Type */
+  --cv-font: "Schibsted Grotesk", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --cv-text-xs: 0.78rem;
+  --cv-text-sm: 0.875rem;
+  --cv-text-md: 1rem;
+  --cv-text-lg: 1.25rem;
+  --cv-text-xl: 1.75rem;
+
+  /* Shape and spacing */
+  --cv-radius-sm: 6px;
+  --cv-radius-md: 10px;
+  --cv-radius-lg: 14px;
+  --cv-gap: 20px;
+  --cv-gutter: 16px;
+  --cv-panel-pad: 20px;
+}
+
+@media (min-width: 720px) {
+  :root {
+    --cv-gutter: 24px;
+  }
+}

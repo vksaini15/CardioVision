@@ -1,0 +1,141 @@
+/* Page layout: header, disclaimer strip, and the two-column dashboard grid. */
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---- Header ---- */
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding: 16px var(--cv-gutter);
+  border-bottom: 1px solid var(--cv-line);
+  background: var(--cv-surface);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.brand__mark {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  color: var(--cv-accent);
+}
+
+.brand__title {
+  font-size: var(--cv-text-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.brand__subtitle {
+  margin-top: 2px;
+  font-size: var(--cv-text-sm);
+  color: var(--cv-text-muted);
+}
+
+/* ---- Disclaimer strip ---- */
+.disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px var(--cv-gutter);
+  background: #1a2433;
+  border-bottom: 1px solid var(--cv-line);
+  font-size: var(--cv-text-sm);
+  color: var(--cv-text);
+}
+
+.disclaimer__icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  color: var(--cv-status-standby);
+}
+
+.disclaimer__text {
+  max-width: 78ch;
+}
+
+/* ---- Dashboard grid ----
+   Small screens: viewer, predictions, then the long measurements form.
+   Wide screens: viewer + measurements on the left, predictions pinned on the right. */
+.dashboard {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "viewer"
+    "aside"
+    "measurements";
+  gap: var(--cv-gap);
+  padding: var(--cv-gutter);
+  align-content: start;
+}
+
+.dashboard__viewer { grid-area: viewer; min-width: 0; }
+.dashboard__measurements { grid-area: measurements; min-width: 0; }
+
+.dashboard__aside {
+  grid-area: aside;
+  display: grid;
+  gap: var(--cv-gap);
+  min-width: 0;
+}
+
+@media (min-width: 1100px) {
+  .dashboard {
+    grid-template-columns: minmax(0, 1fr) 380px;
+    grid-template-areas:
+      "viewer aside"
+      "measurements aside";
+    grid-template-rows: auto 1fr;
+  }
+
+  /* Keep the predictions in view while the measurements scroll. */
+  .dashboard__aside {
+    align-self: start;
+    position: sticky;
+    top: var(--cv-gutter);
+  }
+}
+
+/* ---- Shared panel look ---- */
+.panel {
+  background: var(--cv-surface);
+  border: 1px solid var(--cv-line);
+  border-radius: var(--cv-radius-lg);
+  padding: var(--cv-panel-pad);
+}
+
+.panel__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin-bottom: 16px;
+}
+
+.panel__title {
+  font-size: var(--cv-text-lg);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.panel__hint {
+  font-size: var(--cv-text-sm);
+  color: var(--cv-text-muted);
+}
