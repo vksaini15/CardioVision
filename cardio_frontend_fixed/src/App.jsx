@@ -7,9 +7,10 @@ import ViewerPanel from "./components/viewer/ViewerPanel.jsx";
 import PredictionPanel from "./components/predictions/PredictionPanel.jsx";
 import PatientMeasurements from "./components/patient/PatientMeasurements.jsx";
 import SystemStatusPanel from "./components/status/SystemStatusPanel.jsx";
+import ExplainabilityPanel from "./components/explainability/ExplainabilityPanel.jsx";
 import { summarizeStatus } from "./components/status/systemStatus.js";
 import { usePatientMeasurements } from "./hooks/usePatientMeasurements.js";
-import { checkHealth, predictPatient } from "./services/predictionApi.js";
+import { checkHealth, predictPatient, explainPatient } from "./services/predictionApi.js";
 
 function buildPayload(values, bmi) {
   const payload = {};
@@ -18,7 +19,7 @@ function buildPayload(values, bmi) {
     if (value === "") continue;
     if (key === "Length" || key === "Weight") {
       payload[key] = Number(value);
-    } else if (["Age", "DM", "HTN", "Current Smoker", "EX-Smoker", "FH", "Edema", "Typical Chest Pain", "Function Class", "Q Wave", "St Elevation", "St Depression", "Tinversion", "BP", "PR", "FBS", "CR", "TG", "LDL", "HDL", "BUN", "ESR", "HB", "K", "Na", "WBC", "Lymph", "Neut", "PLT", "EF-TTE", "Region RWMA"].includes(key)) {
+    } else if (["Age", "BP", "PR", "FBS", "CR", "TG", "LDL", "HDL", "BUN", "ESR", "HB", "K", "Na", "WBC", "Lymph", "Neut", "PLT", "EF-TTE", "Region RWMA"].includes(key)) {
       payload[key] = Number(value);
     } else {
       payload[key] = value;
@@ -27,16 +28,6 @@ function buildPayload(values, bmi) {
 
   payload.BMI = Number(bmi);
   return payload;
-}
-
-function mapPrediction(raw) {
-  return raw
-    ? {
-        label: `${(raw.probability * 100).toFixed(1)}%`,
-        probability: raw.probability,
-        prediction: raw.prediction,
-      }
-    : null;
 }
 
 
@@ -54,6 +45,16 @@ const DEMO_PATIENT = {
   "Region RWMA": 0, VHD: "N",
 };
 
+function mapPrediction(raw) {
+  return raw
+    ? {
+        label: `${(raw.probability * 100).toFixed(1)}%`,
+        probability: raw.probability,
+        prediction: raw.prediction,
+      }
+    : null;
+}
+
 export default function App() {
   const patient = usePatientMeasurements();
   const [serviceState, setServiceState] = useState("loading");
@@ -61,7 +62,11 @@ export default function App() {
   const [predictionState, setPredictionState] = useState("standby");
   const [predictionError, setPredictionError] = useState("");
   const [results, setResults] = useState({});
-
+  const [explanationTarget, setExplanationTarget] = useState("Cath");
+  const [explanationState, setExplanationState] = useState("standby");
+  const [explanation, setExplanation] = useState(null);
+  const [explanationError, setExplanationError] = useState("");
+  const [lastPayload, setLastPayload] = useState(null);
   const loadDemoPatient = useCallback(() => {
     for (const [key, value] of Object.entries(DEMO_PATIENT)) patient.setValue(key, String(value));
   }, [patient]);
@@ -91,7 +96,9 @@ export default function App() {
     setResults({});
 
     try {
-      const response = await predictPatient(buildPayload(patient.values, patient.bmi));
+      const payload = buildPayload(patient.values, patient.bmi);
+      setLastPayload(payload);
+      const response = await predictPatient(payload);
       const raw = response?.predictions || {};
       setResults({
         cad: mapPrediction(raw.Cath),
@@ -100,11 +107,40 @@ export default function App() {
         rca: mapPrediction(raw.RCA),
       });
       setPredictionState("ready");
+
+      setExplanationState("loading");
+      setExplanationError("");
+      try {
+        const explanationResponse = await explainPatient("Cath", payload);
+        setExplanation(explanationResponse?.explanation || null);
+        setExplanationState("ready");
+      } catch (explainError) {
+        setExplanation(null);
+        setExplanationState("error");
+        setExplanationError(explainError.message || "Explainability request failed.");
+      }
     } catch (error) {
       setPredictionState("error");
       setPredictionError(error.message || "Prediction request failed.");
     }
   }, [patient.hasCompleteModelInput, patient.bmi, patient.values, serviceState]);
+
+
+  const changeExplanationTarget = useCallback(async (target) => {
+    setExplanationTarget(target);
+    if (!lastPayload || !results.cad) return;
+    setExplanationState("loading");
+    setExplanationError("");
+    try {
+      const response = await explainPatient(target, lastPayload);
+      setExplanation(response?.explanation || null);
+      setExplanationState("ready");
+    } catch (error) {
+      setExplanation(null);
+      setExplanationState("error");
+      setExplanationError(error.message || "Explainability request failed.");
+    }
+  }, [lastPayload, results.cad]);
 
   const systemStatus = useMemo(() => [
     { id: "viewer", name: "3D heart viewer", state: "ready", detail: "Anatomical model loaded" },
@@ -118,9 +154,16 @@ export default function App() {
       <Header status={overall} />
       <DisclaimerBanner />
       <main className="dashboard">
-        <ViewerPanel />
+        <ViewerPanel results={results} />
         <aside className="dashboard__aside" aria-label="Predictions and system status">
           <PredictionPanel state={predictionState} results={results} error={predictionError} />
+          <ExplainabilityPanel
+            state={explanationState}
+            explanation={explanation}
+            target={explanationTarget}
+            onTargetChange={changeExplanationTarget}
+            error={explanationError}
+          />
           <SystemStatusPanel items={systemStatus} />
         </aside>
         <PatientMeasurements

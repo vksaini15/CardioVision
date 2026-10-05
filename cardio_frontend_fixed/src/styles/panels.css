@@ -432,3 +432,94 @@
 
 .prediction__fill { display: block; height: 100%; background: var(--cv-accent); border-radius: inherit; transition: width 300ms ease; }
 .prediction-panel__error { margin: 0 0 12px; padding: 10px 12px; border: 1px solid color-mix(in srgb, var(--cv-status-error) 45%, var(--cv-line)); border-radius: var(--cv-radius-sm); color: var(--cv-text-muted); font-size: var(--cv-text-sm); }
+
+
+
+
+.coronary-status { position:absolute; left:50%; bottom:16px; transform:translateX(-50%); z-index:2; padding:7px 12px; border:1px solid rgba(255,255,255,.10); border-radius:999px; background:rgba(7,16,25,.78); font-size:10px; letter-spacing:.02em; opacity:.72; white-space:nowrap; pointer-events:none; }
+.coronary-status--active { border-color:rgba(255,91,97,.38); opacity:.9; }
+@media (max-width:760px) { .coronary-status { max-width:90%; overflow:hidden; text-overflow:ellipsis; } }
+
+/* =========================================================
+   Coronary risk visualization overlay
+   ========================================================= */
+.heart-scene { position: absolute; inset: 0; }
+.viewer__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.coronary-legend {
+  position: absolute; left: 18px; bottom: 18px; z-index: 3;
+  padding: 10px 12px; border: 1px solid var(--cv-line); border-radius: 10px;
+  background: color-mix(in srgb, var(--cv-surface) 88%, transparent);
+  backdrop-filter: blur(8px); box-shadow: 0 8px 24px rgba(0,0,0,.22);
+}
+.coronary-legend__title { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--cv-text); margin-bottom: 7px; }
+.coronary-legend__items { display: flex; flex-wrap: wrap; gap: 8px 12px; color: var(--cv-text-muted); font-size: 11px; }
+.risk-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+.risk-dot--lower { background: #38d49f; }
+.risk-dot--moderate { background: #ff9f32; }
+.risk-dot--high { background: #f72f3d; }
+.coronary-labels { position: absolute; top: 54px; right: 18px; z-index: 3; display: grid; gap: 7px; width: 132px; }
+.coronary-label { display: grid; grid-template-columns: 1fr auto; gap: 1px 8px; text-align: left; padding: 8px 10px; border: 1px solid var(--cv-line); border-left: 3px solid var(--risk-color); border-radius: 9px; color: var(--cv-text); background: color-mix(in srgb, var(--cv-surface) 90%, transparent); backdrop-filter: blur(8px); cursor: pointer; transition: transform .15s ease, border-color .15s ease, background .15s ease; }
+.coronary-label:hover, .coronary-label.is-selected { transform: translateX(-3px); border-color: var(--risk-color); background: color-mix(in srgb, var(--cv-surface-raised) 94%, transparent); }
+.coronary-label__name { font-size: 12px; font-weight: 800; }
+.coronary-label__value { font-size: 12px; font-weight: 800; color: var(--risk-color); }
+.coronary-label__band { grid-column: 1 / -1; font-size: 10px; color: var(--cv-text-faint); }
+.coronary-label--lower { --risk-color: #38d49f; }
+.coronary-label--moderate { --risk-color: #ff9f32; }
+.coronary-label--high { --risk-color: #f72f3d; }
+.coronary-label--no-prediction { --risk-color: #8092a1; }
+.coronary-focus { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 4; display: flex; align-items: center; gap: 9px; padding: 8px 11px 8px 13px; border: 1px solid var(--cv-line); border-radius: 999px; background: color-mix(in srgb, var(--cv-surface-raised) 94%, transparent); box-shadow: 0 8px 24px rgba(0,0,0,.25); font-size: 12px; white-space: nowrap; }
+.coronary-focus strong { color: var(--cv-text); }
+.coronary-focus span { color: var(--cv-text-muted); }
+.coronary-focus button { width: 22px; height: 22px; border: 0; border-radius: 50%; background: var(--cv-line); color: var(--cv-text); cursor: pointer; font-size: 15px; line-height: 1; }
+@media (max-width: 720px) {
+  .coronary-labels { top: 52px; right: 10px; width: 116px; }
+  .coronary-legend { left: 10px; right: 10px; bottom: 10px; }
+  .coronary-legend__items { gap: 5px 9px; }
+}
+
+/* =========================================================
+   Explainability panel
+   ========================================================= */
+.explainability { margin-top: 16px; }
+.explainability__status {
+  font-size: var(--cv-text-xs);
+  color: var(--cv-text-muted);
+  border: 1px solid var(--cv-line);
+  border-radius: 999px;
+  padding: 5px 9px;
+}
+.explainability__status--ready { color: var(--cv-status-ready); }
+.explainability__status--loading { color: var(--cv-status-loading); }
+.explainability__targets { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+.explainability__target {
+  border: 1px solid var(--cv-line);
+  background: var(--cv-bg);
+  color: var(--cv-text-muted);
+  border-radius: 999px;
+  padding: 7px 11px;
+  cursor: pointer;
+  font-size: var(--cv-text-xs);
+}
+.explainability__target.is-active { color: var(--cv-text); border-color: var(--cv-accent); background: color-mix(in srgb, var(--cv-accent) 12%, var(--cv-bg)); }
+.explainability__target:disabled { opacity: .6; cursor: wait; }
+.explainability__empty, .explainability__loading { padding: 14px; border: 1px dashed var(--cv-line); border-radius: var(--cv-radius-md); color: var(--cv-text-muted); font-size: var(--cv-text-sm); }
+.explainability__error { color: var(--cv-status-error); font-size: var(--cv-text-sm); }
+.explainability__summary { display:flex; justify-content:space-between; gap:12px; padding: 12px 14px; border-radius: var(--cv-radius-md); background: var(--cv-surface-raised); border:1px solid var(--cv-line); margin-bottom: 12px; }
+.explainability__summary span { color: var(--cv-text-muted); font-size: var(--cv-text-sm); }
+.explainability__summary strong { font-size: var(--cv-text-md); }
+.explainability__list { display:grid; gap:10px; }
+.impact { padding: 11px 12px; background: var(--cv-bg); border:1px solid var(--cv-line); border-radius: var(--cv-radius-sm); }
+.impact__head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+.impact__head > div { display:grid; gap:3px; min-width:0; }
+.impact__head strong { font-size: var(--cv-text-sm); overflow-wrap:anywhere; }
+.impact__head span { color:var(--cv-text-muted); font-size:var(--cv-text-xs); }
+.impact__head em { color:var(--cv-text-faint); font-style:normal; }
+.impact__value { flex:none; font-size:var(--cv-text-sm); }
+.impact__value--positive { color: #ff8c42; }
+.impact__value--negative { color: #45d7a9; }
+.impact__track { height:5px; background:var(--cv-line-soft); border-radius:999px; margin-top:9px; overflow:hidden; }
+.impact__bar { display:block; height:100%; border-radius:999px; }
+.impact__bar--positive { background:#ff8c42; }
+.impact__bar--negative { background:#45d7a9; }
+.impact p { margin:7px 0 0; color:var(--cv-text-faint); font-size:var(--cv-text-xs); }
+.explainability__note { margin:12px 0 0; color:var(--cv-text-faint); font-size:var(--cv-text-xs); line-height:1.5; }

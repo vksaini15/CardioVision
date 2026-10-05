@@ -27,7 +27,7 @@ class ViewerErrorBoundary extends React.Component {
   }
 }
 
-function ViewerPanel() {
+function ViewerPanel({ results = {} }) {
   return (
     <section className="panel viewer dashboard__viewer" aria-labelledby="viewer-title">
       <div className="viewer__bar">
@@ -46,7 +46,7 @@ function ViewerPanel() {
         <span className="viewer__corner viewer__corner--br" aria-hidden="true" />
 
         <ViewerErrorBoundary>
-          <HeartScene />
+          <HeartScene results={results} />
         </ViewerErrorBoundary>
       </div>
     </section>

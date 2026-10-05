@@ -377,7 +377,54 @@ function createProgram(gl) {
   return program;
 }
 
-function HeartRenderer({ onError }) {
+function riskColor(probability) {
+  if (!Number.isFinite(probability)) return [0.55, 0.64, 0.70, 0.85];
+  if (probability >= 0.70) return [0.98, 0.20, 0.25, 1.0];
+  if (probability >= 0.40) return [1.00, 0.62, 0.18, 1.0];
+  return [0.22, 0.84, 0.65, 1.0];
+}
+
+function riskBand(probability) {
+  if (!Number.isFinite(probability)) return "No prediction";
+  if (probability >= 0.70) return "High";
+  if (probability >= 0.40) return "Moderate";
+  return "Lower";
+}
+
+function makeCoronaryPaths(resultMap) {
+  const defs = [
+    { id: "lad", name: "LAD", probability: resultMap.lad?.probability, points: [[0.02,0.92,0.24],[-0.01,0.62,0.29],[0.00,0.28,0.32],[0.02,-0.10,0.29],[0.03,-0.48,0.23]] },
+    { id: "lcx", name: "LCX", probability: resultMap.lcx?.probability, points: [[-0.02,0.73,0.25],[-0.25,0.70,0.29],[-0.50,0.58,0.27],[-0.70,0.36,0.22],[-0.78,0.08,0.16]] },
+    { id: "rca", name: "RCA", probability: resultMap.rca?.probability, points: [[0.22,0.62,0.26],[0.42,0.55,0.28],[0.58,0.38,0.25],[0.68,0.10,0.20],[0.64,-0.22,0.16]] },
+  ];
+  return defs.map((def) => ({ ...def, color: riskColor(def.probability), band: riskBand(def.probability) }));
+}
+
+function buildRibbon(points, width) {
+  const positions = new Float32Array(points.length * 2 * 3);
+  const normals = new Float32Array(points.length * 2 * 3);
+
+  for (let i = 0; i < points.length; i += 1) {
+    const p = points[i];
+    const prev = points[Math.max(0, i - 1)];
+    const next = points[Math.min(points.length - 1, i + 1)];
+    let tangent = normalize3(next[0] - prev[0], next[1] - prev[1], next[2] - prev[2]);
+    let side = [tangent[1] * 0 - tangent[2] * 1, tangent[2] * 0 - tangent[0] * 0, tangent[0] * 1 - tangent[1] * 0];
+    const sideLen = Math.hypot(...side);
+    if (sideLen < 0.001) side = [1, 0, 0];
+    else side = normalize3(...side);
+
+    const a = [p[0] + side[0] * width, p[1] + side[1] * width, p[2] + side[2] * width];
+    const b = [p[0] - side[0] * width, p[1] - side[1] * width, p[2] - side[2] * width];
+    positions.set(a, i * 6);
+    positions.set(b, i * 6 + 3);
+    normals.set([0, 0, 1], i * 6);
+    normals.set([0, 0, 1], i * 6 + 3);
+  }
+  return { positions, normals, count: points.length * 2 };
+}
+
+function HeartRenderer({ onError, results = {}, selectedVessel = null }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -389,6 +436,7 @@ function HeartRenderer({ onError }) {
     let gl = null;
     let program = null;
     let parts = [];
+    let coronaryBuffers = [];
 
     const state = {
       yaw: 0.25,
@@ -470,6 +518,19 @@ function HeartRenderer({ onError }) {
           gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, part.indexBuffer);
           gl.drawElements(gl.TRIANGLES, part.indexCount, gl.UNSIGNED_INT, 0);
         }
+
+        // Coronary layer uses the same camera as the anatomical model, so vessels rotate/zoom with the heart.
+        gl.disable(gl.CULL_FACE);
+        for (const vessel of coronaryBuffers) {
+          gl.bindBuffer(gl.ARRAY_BUFFER, vessel.positionBuffer);
+          gl.vertexAttribPointer(vessel.positionLocation, 3, gl.FLOAT, false, 0, 0);
+          gl.bindBuffer(gl.ARRAY_BUFFER, vessel.normalBuffer);
+          gl.vertexAttribPointer(vessel.normalLocation, 3, gl.FLOAT, false, 0, 0);
+          gl.bindBuffer(gl.ARRAY_BUFFER, vessel.colorBuffer);
+          gl.vertexAttribPointer(vessel.colorLocation, 4, gl.FLOAT, false, 0, 0);
+          gl.drawArrays(gl.TRIANGLE_STRIP, 0, vessel.count);
+        }
+        gl.enable(gl.CULL_FACE);
       } catch (error) {
         cancelAnimationFrame(frame);
         fail(error);
@@ -578,6 +639,25 @@ function HeartRenderer({ onError }) {
           part.indexCount = part.indices.length;
         }
 
+        coronaryBuffers = makeCoronaryPaths(results).map((vessel) => {
+          const probability = Number.isFinite(vessel.probability) ? vessel.probability : 0.35;
+          const width = 0.012 + probability * 0.014 + (selectedVessel === vessel.id ? 0.010 : 0);
+          const ribbon = buildRibbon(vessel.points, width);
+          const colors = new Float32Array(ribbon.count * 4);
+          for (let i = 0; i < ribbon.count; i += 1) colors.set(vessel.color, i * 4);
+          const positionBuffer = gl.createBuffer();
+          const normalBuffer = gl.createBuffer();
+          const colorBuffer = gl.createBuffer();
+          if (!positionBuffer || !normalBuffer || !colorBuffer) throw new Error(`Could not create ${vessel.id} coronary buffers`);
+          gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+          gl.bufferData(gl.ARRAY_BUFFER, ribbon.positions, gl.STATIC_DRAW);
+          gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+          gl.bufferData(gl.ARRAY_BUFFER, ribbon.normals, gl.STATIC_DRAW);
+          gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+          gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
+          return { ...vessel, positionBuffer, normalBuffer, colorBuffer, count: ribbon.count, positionLocation, normalLocation, colorLocation };
+        });
+
         resize();
         frame = requestAnimationFrame(render);
       } catch (error) {
@@ -605,10 +685,15 @@ function HeartRenderer({ onError }) {
           gl.deleteBuffer(part.colorBuffer);
           gl.deleteBuffer(part.indexBuffer);
         }
+        for (const vessel of coronaryBuffers) {
+          gl.deleteBuffer(vessel.positionBuffer);
+          gl.deleteBuffer(vessel.normalBuffer);
+          gl.deleteBuffer(vessel.colorBuffer);
+        }
         if (program) gl.deleteProgram(program);
       }
     };
-  }, [onError]);
+  }, [onError, results.lad?.probability, results.lcx?.probability, results.rca?.probability, selectedVessel]);
 
   return (
     <canvas
@@ -629,32 +714,66 @@ function ViewerFallback({ title, detail }) {
   );
 }
 
-function CoronaryVesselLayer() {
-  // Reserved layer for future LAD/LCX/RCA visualization.
-  // The supplied anatomical GLB does not contain those coronary vessel meshes.
-  return null;
-}
-
-export default function HeartScene() {
+export default function HeartScene({ results = {} }) {
   const [error, setError] = useState(null);
+  const [selectedVessel, setSelectedVessel] = useState(null);
+  const vessels = makeCoronaryPaths(results);
+  const hasPrediction = vessels.some((item) => Number.isFinite(item.probability));
+  const selected = vessels.find((item) => item.id === selectedVessel) || null;
 
   return (
     <div className="heart-scene" data-viewer-slot="heart">
       {!error ? (
-        <HeartRenderer onError={setError} />
+        <HeartRenderer results={results} selectedVessel={selectedVessel} onError={setError} />
       ) : (
         <ViewerFallback
           title={FALLBACK_TEXT}
-          detail="The rest of the CardioVision dashboard is still available. Check the browser console for the technical error and confirm the model file is present at /models/VH_M_Heart.glb."
+          detail="The rest of the CardioVision dashboard is still available. Confirm the model file is present at /models/VH_M_Heart.glb."
         />
       )}
 
-      <CoronaryVesselLayer />
-
       {!error && (
         <>
-          <div className="viewer__model-badge">ANATOMICAL BASE MODEL</div>
+          <div className="viewer__model-badge">ANATOMICAL BASE + CORONARY RISK MAP</div>
           <div className="viewer__controls-hint">Drag · Zoom · Shift/Right-drag Pan</div>
+
+          <div className="coronary-legend" aria-label="Coronary risk legend">
+            <div className="coronary-legend__title">Predicted vessel risk</div>
+            <div className="coronary-legend__items">
+              <span><i className="risk-dot risk-dot--lower" /> Lower &lt;40%</span>
+              <span><i className="risk-dot risk-dot--moderate" /> Moderate 40–69%</span>
+              <span><i className="risk-dot risk-dot--high" /> High ≥70%</span>
+            </div>
+          </div>
+
+          {hasPrediction && (
+            <div className="coronary-labels" aria-label="Coronary vessel predictions">
+              {vessels.map((vessel) => {
+                const pct = Number.isFinite(vessel.probability) ? `${(vessel.probability * 100).toFixed(1)}%` : "—";
+                return (
+                  <button
+                    key={vessel.id}
+                    type="button"
+                    className={`coronary-label coronary-label--${vessel.band.toLowerCase().replace(/\s/g, "-")}${selectedVessel === vessel.id ? " is-selected" : ""}`}
+                    onClick={() => setSelectedVessel((current) => current === vessel.id ? null : vessel.id)}
+                    aria-pressed={selectedVessel === vessel.id}
+                  >
+                    <span className="coronary-label__name">{vessel.name}</span>
+                    <span className="coronary-label__value">{pct}</span>
+                    <span className="coronary-label__band">{vessel.band}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {selected && (
+            <div className="coronary-focus" role="status" aria-live="polite">
+              <strong>{selected.name}</strong>
+              <span>{Number.isFinite(selected.probability) ? `${(selected.probability * 100).toFixed(1)}% predicted probability` : "No prediction yet"}</span>
+              <button type="button" onClick={() => setSelectedVessel(null)} aria-label="Clear vessel selection">×</button>
+            </div>
+          )}
         </>
       )}
     </div>

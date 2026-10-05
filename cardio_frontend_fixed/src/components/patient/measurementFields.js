@@ -10,14 +10,6 @@ const yesNo = (id, label) => ({
   ],
 });
 
-const binaryNumber = (id, label) => ({
-  id, label, type: "select",
-  options: [
-    { value: "0", label: "No" },
-    { value: "1", label: "Yes" },
-  ],
-});
-
 const number = (id, label, unit = "", step = 1) => ({
   id, label, unit, type: "number", step,
 });
@@ -38,11 +30,11 @@ export const MEASUREMENT_GROUPS = [
         ],
       },
       { id: "BMI", label: "BMI", unit: "kg/m²", type: "number", step: 0.1, computed: true },
-      binaryNumber("DM", "Diabetes"),
-      binaryNumber("HTN", "Hypertension"),
-      binaryNumber("Current Smoker", "Current smoker"),
-      binaryNumber("EX-Smoker", "Ex-smoker"),
-      binaryNumber("FH", "Family history"),
+      yesNo("DM", "Diabetes"),
+      yesNo("HTN", "Hypertension"),
+      yesNo("Current Smoker", "Current smoker"),
+      yesNo("EX-Smoker", "Ex-smoker"),
+      yesNo("FH", "Family history"),
       yesNo("Obesity", "Obesity"),
       yesNo("CRF", "Chronic renal failure"),
       yesNo("CVA", "Cerebrovascular accident history"),
@@ -58,20 +50,20 @@ export const MEASUREMENT_GROUPS = [
     fields: [
       number("BP", "Blood pressure", "mmHg"),
       number("PR", "Pulse rate", "bpm"),
-      binaryNumber("Edema", "Edema"),
+      yesNo("Edema", "Edema"),
       yesNo("Weak Peripheral Pulse", "Weak peripheral pulse"),
       yesNo("Lung rales", "Lung rales"),
       yesNo("Systolic Murmur", "Systolic murmur"),
       yesNo("Diastolic Murmur", "Diastolic murmur"),
-      binaryNumber("Typical Chest Pain", "Typical chest pain"),
+      yesNo("Typical Chest Pain", "Typical chest pain"),
       yesNo("Dyspnea", "Dyspnea"),
       {
         id: "Function Class", label: "Function class", type: "select",
         options: [
-          { value: "0", label: "0" },
-          { value: "1", label: "1" },
-          { value: "2", label: "2" },
-          { value: "3", label: "3" },
+          { value: "I", label: "I" },
+          { value: "II", label: "II" },
+          { value: "III", label: "III" },
+          { value: "IV", label: "IV" },
         ],
       },
       yesNo("Atypical", "Atypical chest pain"),
@@ -84,10 +76,10 @@ export const MEASUREMENT_GROUPS = [
     id: "ecg",
     title: "ECG",
     fields: [
-      binaryNumber("Q Wave", "Q wave"),
-      binaryNumber("St Elevation", "ST elevation"),
-      binaryNumber("St Depression", "ST depression"),
-      binaryNumber("Tinversion", "T inversion"),
+      yesNo("Q Wave", "Q wave"),
+      yesNo("St Elevation", "ST elevation"),
+      yesNo("St Depression", "ST depression"),
+      yesNo("Tinversion", "T inversion"),
       yesNo("LVH", "LVH"),
       yesNo("Poor R Progression", "Poor R progression"),
       yesNo("BBB", "Bundle branch block"),
@@ -122,8 +114,8 @@ export const MEASUREMENT_GROUPS = [
       {
         id: "VHD", label: "Valvular heart disease", type: "select",
         options: [
-          { value: "N", label: "None" },
-          { value: "mild", label: "Mild" },
+          { value: "None", label: "None" },
+          { value: "Mild", label: "Mild" },
           { value: "Moderate", label: "Moderate" },
           { value: "Severe", label: "Severe" },
         ],

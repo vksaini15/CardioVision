@@ -34,3 +34,11 @@ export async function predictPatient(features) {
     body: JSON.stringify(features),
   });
 }
+
+
+export async function explainPatient(target, features) {
+  return request("/api/explain", {
+    method: "POST",
+    body: JSON.stringify({ target, features }),
+  });
+}
