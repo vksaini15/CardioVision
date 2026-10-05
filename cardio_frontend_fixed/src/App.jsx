@@ -5,6 +5,7 @@ import Header from "./components/layout/Header.jsx";
 import DisclaimerBanner from "./components/layout/DisclaimerBanner.jsx";
 import ViewerPanel from "./components/viewer/ViewerPanel.jsx";
 import PredictionPanel from "./components/predictions/PredictionPanel.jsx";
+import ModelPerformance from "./components/predictions/ModelPerformance.jsx";
 import PatientMeasurements from "./components/patient/PatientMeasurements.jsx";
 import SystemStatusPanel from "./components/status/SystemStatusPanel.jsx";
 import ExplainabilityPanel from "./components/explainability/ExplainabilityPanel.jsx";
@@ -156,7 +157,14 @@ export default function App() {
       <main className="dashboard">
         <ViewerPanel results={results} />
         <aside className="dashboard__aside" aria-label="Predictions and system status">
-          <PredictionPanel state={predictionState} results={results} error={predictionError} />
+          <PredictionPanel
+  state={predictionState}
+  results={results}
+  error={predictionError}
+/>
+
+<ModelPerformance />
+
           <ExplainabilityPanel
             state={explanationState}
             explanation={explanation}

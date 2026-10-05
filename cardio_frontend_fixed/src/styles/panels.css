@@ -614,3 +614,58 @@
   line-height: 1.5;
   opacity: 0.6;
 }
+
+/* Model Performance */
+
+.model-performance__list {
+  display: grid;
+  gap: 12px;
+}
+
+.model-performance__card {
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.model-performance__name {
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.model-performance__metrics {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.model-performance__metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.model-performance__metric span {
+  font-size: 0.68rem;
+  opacity: 0.6;
+}
+
+.model-performance__metric strong {
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.model-performance__note {
+  margin: 14px 0 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  opacity: 0.6;
+}
+
+@media (max-width: 700px) {
+  .model-performance__metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
