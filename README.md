@@ -106,7 +106,7 @@ LAD — 65.1%
 
 Overall CAD is intentionally excluded from the vessel comparison because CAD represents the overall disease target rather than an individual coronary vessel.
 
-🧠 Clinical Explainability
+### 🧠 Clinical Explainability
 
 CardioVision includes patient-level model explainability.
 
@@ -137,7 +137,7 @@ The explainability result should be interpreted as a local model-sensitivity est
 
 SHAP is not used to generate the current production explanation panel. The current implementation uses local feature perturbation because the development environment encountered a Windows-specific dependency restriction affecting SHAP.
 
-🔒 Target Leakage Prevention
+###🔒 Target Leakage Prevention
 
 Target leakage is particularly important for this dataset because the angiographic labels directly describe the outcomes being predicted.
 
@@ -187,7 +187,7 @@ RCA
 
 This prevents the model from directly receiving angiographic outcomes that would otherwise leak the answer into the prediction process.
 
-📚 Dataset
+###📚 Dataset
 
 CardioVision uses the:
 
@@ -208,7 +208,7 @@ The dataset contains:
 
 The dataset contains clinical and physiological features that can be used to investigate cardiovascular disease and vessel-specific stenosis classification.
 
-🧹 Data Preprocessing
+###🧹 Data Preprocessing
 
 The preprocessing pipeline performs several steps before model inference.
 
@@ -240,7 +240,7 @@ OneHotEncoder
 
 The preprocessing pipeline is stored together with the trained models so that inference uses the same feature transformations as training.
 
-🤖 Machine Learning Models
+###🤖 Machine Learning Models
 
 The trained models are stored as serialized scikit-learn pipelines.
 
@@ -254,7 +254,7 @@ Target	Selected Model
 
 The models are loaded by the FastAPI backend and used to generate predictions from patient measurements.
 
-📈 Model Performance
+###📈 Model Performance
 
 The current models were evaluated on a held-out test set.
 
@@ -271,7 +271,7 @@ The project intentionally reports these results transparently rather than presen
 
 ⚠️ These metrics are dataset-specific evaluation results. They do not constitute clinical validation or demonstrate clinical deployment readiness.
 
-🏗️ System Architecture
+##🏗️ System Architecture
                          👤 Patient
                             │
                             ▼
@@ -304,7 +304,7 @@ The project intentionally reports these results transparently rather than presen
               └─────────────┼─────────────┘
                             ▼
                    🖥️ CardioVision UI
-🔌 Backend Architecture
+##🔌 Backend Architecture
 
 The backend is implemented using FastAPI.
 
@@ -336,7 +336,7 @@ Prediction probabilities
       │
       ▼
 React Dashboard
-⚛️ Frontend Architecture
+##⚛️ Frontend Architecture
 
 The frontend is built with:
 
@@ -358,7 +358,7 @@ components/
 
 The application is designed as a modular dashboard so that prediction, visualization, patient data, system status, and explainability can operate as separate components.
 
-📁 Project Structure
+##📁 Project Structure
 CardioVision/
 │
 ├── backend/
@@ -397,8 +397,8 @@ CardioVision/
 │
 ├── .gitignore
 └── README.md
-🛠️ Technology Stack
-🐍 Backend
+##🛠️ Technology Stack
+###🐍 Backend
 Python
 FastAPI
 pandas
@@ -406,18 +406,18 @@ NumPy
 scikit-learn
 joblib
 openpyxl
-⚛️ Frontend
+###⚛️ Frontend
 React
 Vite
 JavaScript
 CSS
 Three.js / WebGL
-🔧 Development
+###🔧 Development
 Git
 GitHub
 VS Code
 PowerShell
-# ▶️ Installation & Setup
+## ▶️ Installation & Setup
 
 > The following setup assumes you have already cloned or downloaded the CardioVision repository.
 
@@ -428,7 +428,7 @@ Before starting, make sure you have:
 - 🟢 Node.js 18+
 - 📦 npm
 - 💻 Git
-🐍 Backend Setup
+###🐍 Backend Setup
 
 Open PowerShell:
 
@@ -461,7 +461,7 @@ http://localhost:8000/docs
 Health endpoint:
 
 http://localhost:8000/health
-⚛️ Frontend Setup
+###⚛️ Frontend Setup
 
 Open a second PowerShell window.
 
@@ -480,7 +480,7 @@ npm run dev
 The frontend will normally be available at:
 
 http://localhost:5173
-🧪 Quick Demo
+##🧪 Quick Demo
 
 After starting both servers:
 
@@ -534,7 +534,7 @@ ROC-AUC
 
 for each trained model.
 
-🔬 Current Limitations
+##🔬 Current Limitations
 
 CardioVision is a prototype and has several important limitations.
 
@@ -562,7 +562,7 @@ Clinical deployment
 
 The system is not intended for clinical deployment.
 
-🚀 Future Work
+##🚀 Future Work
 
 Potential future improvements include:
 
@@ -624,8 +624,8 @@ Show which patient features are locally associated with changes in the model's p
 
 Connect those predictions to an interactive 3D anatomical interface.
 
-❤️ Final Note
+##❤️ Final Note
 
 CardioVision demonstrates how machine learning, interactive visualization, and explainability can be combined into a single cardiovascular decision-support prototype.
 
-Predict. Explain. Visualize. 🫀🤖🧠
+#Predict. Explain. Visualize. 🫀🤖🧠
