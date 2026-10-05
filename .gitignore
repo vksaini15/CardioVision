@@ -1,4 +1,10 @@
-﻿# Python
+﻿# Local backup copies
+backend_old/
+cardio_frontend_fixed3/
+cardio_frontend_fixed_backup2/
+cardio_frontend_fixed_old/
+cardio_frontend_fixed_prediction_backup/
+# Python
 __pycache__/
 *.py[cod]
 *.pyo
