@@ -1,7 +1,3 @@
-// One prediction row. `state` is: standby | loading | ready | error.
-// `result` is null until the prediction service exists. When it does, pass
-// `result.label` (text to show). Nothing is invented here.
-
 const RESULT_TEXT = {
   standby: "No result yet",
   loading: "Calculating…",
@@ -16,6 +12,10 @@ const NOTE_TEXT = {
 
 export default function PredictionCard({ target, state, result }) {
   const resultText = state === "ready" ? result?.label ?? "No result yet" : RESULT_TEXT[state];
+  const probability =
+    state === "ready" && Number.isFinite(result?.probability)
+      ? Math.max(0, Math.min(1, result.probability))
+      : 0;
 
   return (
     <li
@@ -29,7 +29,16 @@ export default function PredictionCard({ target, state, result }) {
         </div>
         <p className="prediction__result">{resultText}</p>
       </div>
-      <div className="prediction__track" aria-hidden="true" />
+
+      <div className="prediction__track" aria-label={`${target.name} probability`}>
+        {state === "ready" ? (
+          <span
+            className="prediction__fill"
+            style={{ width: `${probability * 100}%` }}
+          />
+        ) : null}
+      </div>
+
       {state !== "ready" ? <p className="prediction__note">{NOTE_TEXT[state]}</p> : null}
     </li>
   );

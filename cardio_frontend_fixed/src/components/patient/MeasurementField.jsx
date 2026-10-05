@@ -1,4 +1,3 @@
-/** A single labelled number input or dropdown. Wrapping <label> links text and control. */
 export default function MeasurementField({ field, value, onChange }) {
   const labelText = (
     <span className="field__label">

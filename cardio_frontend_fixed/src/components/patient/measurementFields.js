@@ -1,67 +1,138 @@
-// Core patient measurements shown in the form.
-// This is a subset of the model's inputs; the full set is added with the
-// prediction service. Field ids are UI ids, not backend column names.
+// Complete model input schema for the trained CardioVision pipelines.
+// Target columns (Cath/LAD/LCX/RCA) are deliberately NOT included.
+// "Exertional CP" is also omitted because the backend preprocessing drops it.
+
+const yesNo = (id, label) => ({
+  id, label, type: "select",
+  options: [
+    { value: "N", label: "No" },
+    { value: "Y", label: "Yes" },
+  ],
+});
+
+const binaryNumber = (id, label) => ({
+  id, label, type: "select",
+  options: [
+    { value: "0", label: "No" },
+    { value: "1", label: "Yes" },
+  ],
+});
+
+const number = (id, label, unit = "", step = 1) => ({
+  id, label, unit, type: "number", step,
+});
 
 export const MEASUREMENT_GROUPS = [
   {
     id: "demographics",
     title: "Demographics",
     fields: [
-      { id: "age", label: "Age", unit: "years", type: "number", min: 0, max: 120, step: 1 },
+      number("Age", "Age", "years"),
+      number("Weight", "Weight", "kg", 0.1),
+      number("Length", "Height / length", "cm", 0.1),
       {
-        id: "sex",
-        label: "Sex",
-        type: "select",
+        id: "Sex", label: "Sex", type: "select",
         options: [
-          { value: "male", label: "Male" },
-          { value: "female", label: "Female" },
+          { value: "Male", label: "Male" },
+          { value: "Female", label: "Female" },
         ],
       },
-      { id: "height", label: "Height", unit: "cm", type: "number", min: 100, max: 230, step: 1 },
-      { id: "weight", label: "Weight", unit: "kg", type: "number", min: 20, max: 300, step: 1 },
-      {
-        id: "bmi",
-        label: "BMI",
-        unit: "kg/m²",
-        type: "number",
-        computed: true,
-        help: "Calculated from height and weight",
-      },
+      { id: "BMI", label: "BMI", unit: "kg/m²", type: "number", step: 0.1, computed: true },
+      binaryNumber("DM", "Diabetes"),
+      binaryNumber("HTN", "Hypertension"),
+      binaryNumber("Current Smoker", "Current smoker"),
+      binaryNumber("EX-Smoker", "Ex-smoker"),
+      binaryNumber("FH", "Family history"),
+      yesNo("Obesity", "Obesity"),
+      yesNo("CRF", "Chronic renal failure"),
+      yesNo("CVA", "Cerebrovascular accident history"),
+      yesNo("Airway disease", "Airway disease"),
+      yesNo("Thyroid Disease", "Thyroid disease"),
+      yesNo("CHF", "Congestive heart failure"),
+      yesNo("DLP", "Dyslipidemia"),
     ],
   },
   {
     id: "vitals",
-    title: "Vitals",
+    title: "Vitals and examination",
     fields: [
-      { id: "bloodPressure", label: "Blood pressure", unit: "mmHg", type: "number", min: 50, max: 260, step: 1 },
-      { id: "pulseRate", label: "Pulse rate", unit: "bpm", type: "number", min: 30, max: 220, step: 1 },
+      number("BP", "Blood pressure", "mmHg"),
+      number("PR", "Pulse rate", "bpm"),
+      binaryNumber("Edema", "Edema"),
+      yesNo("Weak Peripheral Pulse", "Weak peripheral pulse"),
+      yesNo("Lung rales", "Lung rales"),
+      yesNo("Systolic Murmur", "Systolic murmur"),
+      yesNo("Diastolic Murmur", "Diastolic murmur"),
+      binaryNumber("Typical Chest Pain", "Typical chest pain"),
+      yesNo("Dyspnea", "Dyspnea"),
+      {
+        id: "Function Class", label: "Function class", type: "select",
+        options: [
+          { value: "0", label: "0" },
+          { value: "1", label: "1" },
+          { value: "2", label: "2" },
+          { value: "3", label: "3" },
+        ],
+      },
+      yesNo("Atypical", "Atypical chest pain"),
+      yesNo("Nonanginal", "Nonanginal symptoms"),
+      // Exertional CP is intentionally omitted: training preprocessing drops it.
+      yesNo("LowTH Ang", "Low-threshold angina"),
+    ],
+  },
+  {
+    id: "ecg",
+    title: "ECG",
+    fields: [
+      binaryNumber("Q Wave", "Q wave"),
+      binaryNumber("St Elevation", "ST elevation"),
+      binaryNumber("St Depression", "ST depression"),
+      binaryNumber("Tinversion", "T inversion"),
+      yesNo("LVH", "LVH"),
+      yesNo("Poor R Progression", "Poor R progression"),
+      yesNo("BBB", "Bundle branch block"),
     ],
   },
   {
     id: "labs",
     title: "Blood tests",
     fields: [
-      { id: "fastingBloodSugar", label: "Fasting blood sugar", unit: "mg/dL", type: "number", min: 20, max: 800, step: 1 },
-      { id: "ldl", label: "LDL cholesterol", unit: "mg/dL", type: "number", min: 10, max: 500, step: 1 },
-      { id: "hdl", label: "HDL cholesterol", unit: "mg/dL", type: "number", min: 5, max: 200, step: 0.1 },
-      { id: "triglycerides", label: "Triglycerides", unit: "mg/dL", type: "number", min: 10, max: 3000, step: 1 },
-      { id: "creatinine", label: "Creatinine", unit: "mg/dL", type: "number", min: 0.1, max: 15, step: 0.1 },
-      { id: "hemoglobin", label: "Hemoglobin", unit: "g/dL", type: "number", min: 3, max: 25, step: 0.1 },
+      number("FBS", "Fasting blood sugar", "mg/dL", 0.1),
+      number("CR", "Creatinine", "mg/dL", 0.01),
+      number("TG", "Triglycerides", "mg/dL", 0.1),
+      number("LDL", "LDL cholesterol", "mg/dL", 0.1),
+      number("HDL", "HDL cholesterol", "mg/dL", 0.1),
+      number("BUN", "BUN", "mg/dL", 0.1),
+      number("ESR", "ESR", "mm/hr", 0.1),
+      number("HB", "Hemoglobin", "g/dL", 0.1),
+      number("K", "Potassium", "", 0.01),
+      number("Na", "Sodium", "", 0.1),
+      number("WBC", "White blood cells", "", 0.1),
+      number("Lymph", "Lymphocytes", "", 0.1),
+      number("Neut", "Neutrophils", "", 0.1),
+      number("PLT", "Platelets", "", 0.1),
     ],
   },
   {
     id: "echo",
-    title: "Heart ultrasound",
+    title: "Echocardiography",
     fields: [
-      { id: "ejectionFraction", label: "Ejection fraction", unit: "%", type: "number", min: 5, max: 85, step: 1 },
+      number("EF-TTE", "Ejection fraction", "%", 0.1),
+      number("Region RWMA", "Region with RWMA", "", 0.1),
+      {
+        id: "VHD", label: "Valvular heart disease", type: "select",
+        options: [
+          { value: "N", label: "None" },
+          { value: "mild", label: "Mild" },
+          { value: "Moderate", label: "Moderate" },
+          { value: "Severe", label: "Severe" },
+        ],
+      },
     ],
   },
 ];
 
-export const HISTORY_TOGGLES = [
-  { id: "diabetes", label: "Diabetes" },
-  { id: "hypertension", label: "Hypertension" },
-  { id: "currentSmoker", label: "Current smoker" },
-  { id: "familyHistory", label: "Family history of heart disease" },
-  { id: "typicalChestPain", label: "Typical chest pain" },
-];
+export const TARGET_COLUMNS = ["Cath", "LAD", "LCX", "RCA"];
+export const OMITTED_FEATURES = ["Exertional CP"];
+
+export const ALL_MODEL_FIELDS = MEASUREMENT_GROUPS.flatMap((group) => group.fields);

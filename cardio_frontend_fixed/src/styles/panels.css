@@ -428,3 +428,7 @@
   right: 16px;
   top: 16px;
 }
+
+
+.prediction__fill { display: block; height: 100%; background: var(--cv-accent); border-radius: inherit; transition: width 300ms ease; }
+.prediction-panel__error { margin: 0 0 12px; padding: 10px 12px; border: 1px solid color-mix(in srgb, var(--cv-status-error) 45%, var(--cv-line)); border-radius: var(--cv-radius-sm); color: var(--cv-text-muted); font-size: var(--cv-text-sm); }
