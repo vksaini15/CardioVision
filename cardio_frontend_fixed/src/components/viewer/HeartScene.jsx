@@ -400,28 +400,76 @@ function makeCoronaryPaths(resultMap) {
   return defs.map((def) => ({ ...def, color: riskColor(def.probability), band: riskBand(def.probability) }));
 }
 
+
+function smoothPath(points, subdivisions = 6) {
+  if (points.length < 3) return points;
+
+  const smooth = [];
+
+  for (let i = 0; i < points.length - 1; i += 1) {
+    const p0 = points[Math.max(0, i - 1)];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[Math.min(points.length - 1, i + 2)];
+
+    for (let step = 0; step < subdivisions; step += 1) {
+      const t = step / subdivisions;
+      const t2 = t * t;
+      const t3 = t2 * t;
+
+      smooth.push(
+        [0, 1, 2].map((axis) =>
+          0.5 * (
+            2 * p1[axis] +
+            (-p0[axis] + p2[axis]) * t +
+            (2 * p0[axis] - 5 * p1[axis] +
+              4 * p2[axis] - p3[axis]) * t2 +
+            (-p0[axis] + 3 * p1[axis] -
+              3 * p2[axis] + p3[axis]) * t3
+          )
+        )
+      );
+    }
+  }
+
+  smooth.push(points[points.length - 1]);
+  return smooth;
+}
+
+
 function buildRibbon(points, width) {
-  const positions = new Float32Array(points.length * 2 * 3);
-  const normals = new Float32Array(points.length * 2 * 3);
+  const curve = smoothPath(points);
+  const positions = new Float32Array(curve.length * 2 * 3);
+  const normals = new Float32Array(curve.length * 2 * 3);
 
-  for (let i = 0; i < points.length; i += 1) {
-    const p = points[i];
-    const prev = points[Math.max(0, i - 1)];
-    const next = points[Math.min(points.length - 1, i + 1)];
-    let tangent = normalize3(next[0] - prev[0], next[1] - prev[1], next[2] - prev[2]);
-    let side = [tangent[1] * 0 - tangent[2] * 1, tangent[2] * 0 - tangent[0] * 0, tangent[0] * 1 - tangent[1] * 0];
-    const sideLen = Math.hypot(...side);
-    if (sideLen < 0.001) side = [1, 0, 0];
-    else side = normalize3(...side);
+  for (let i = 0; i < curve.length; i += 1) {
+    const p = curve[i];
+    const prev = curve[Math.max(0, i - 1)];
+    const next = curve[Math.min(curve.length - 1, i + 1)];
 
-    const a = [p[0] + side[0] * width, p[1] + side[1] * width, p[2] + side[2] * width];
-    const b = [p[0] - side[0] * width, p[1] - side[1] * width, p[2] - side[2] * width];
+    const tangent = normalize3(
+      next[0] - prev[0],
+      next[1] - prev[1],
+      next[2] - prev[2]
+    );
+
+    let side = [-tangent[2], 0, tangent[0]];
+    if (Math.hypot(...side) < 0.001) {
+      side = [1, 0, 0];
+    } else {
+      side = normalize3(...side);
+    }
+
+    const a = p.map((v, axis) => v + side[axis] * width);
+    const b = p.map((v, axis) => v - side[axis] * width);
+
     positions.set(a, i * 6);
     positions.set(b, i * 6 + 3);
     normals.set([0, 0, 1], i * 6);
     normals.set([0, 0, 1], i * 6 + 3);
   }
-  return { positions, normals, count: points.length * 2 };
+
+  return { positions, normals, count: curve.length * 2 };
 }
 
 function HeartRenderer({ onError, results = {}, selectedVessel = null }) {

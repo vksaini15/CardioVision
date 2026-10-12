@@ -1,0 +1,346 @@
+/* CardioVision — premium UI polish layer
+   Visual-only overrides. Keeps the existing ML/API/3D logic untouched. */
+
+:root {
+  --cv-bg: #030914;
+  --cv-surface: rgba(8, 20, 36, 0.82);
+  --cv-surface-raised: rgba(10, 28, 48, 0.82);
+  --cv-line: rgba(70, 151, 215, 0.24);
+  --cv-line-soft: rgba(59, 132, 194, 0.12);
+  --cv-text: #eef7ff;
+  --cv-text-muted: #8da8bf;
+  --cv-text-faint: #5d7890;
+  --cv-accent: #24c7ff;
+  --cv-accent-strong: #62dcff;
+  --cv-accent-ink: #00131c;
+  --cv-radius-lg: 18px;
+  --cv-radius-md: 13px;
+  --cv-panel-pad: 18px;
+  --cv-gap: 16px;
+}
+
+body {
+  background:
+    radial-gradient(circle at 50% -15%, rgba(0, 183, 255, 0.13), transparent 34%),
+    radial-gradient(circle at 5% 70%, rgba(42, 73, 255, 0.08), transparent 28%),
+    linear-gradient(180deg, #020712 0%, #04101d 48%, #020712 100%);
+}
+
+.app-shell {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.app-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  opacity: 0.34;
+  background-image:
+    linear-gradient(rgba(36, 199, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(36, 199, 255, 0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to bottom, black, transparent 90%);
+}
+
+.app-shell::after {
+  content: "";
+  position: fixed;
+  width: 680px;
+  height: 680px;
+  left: -300px;
+  bottom: -380px;
+  z-index: -1;
+  pointer-events: none;
+  border: 1px solid rgba(36, 199, 255, 0.12);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 70px rgba(36, 199, 255, 0.025),
+    0 0 0 150px rgba(36, 199, 255, 0.018),
+    0 0 90px rgba(36, 199, 255, 0.08);
+}
+
+/* Header */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 13px clamp(16px, 2vw, 28px);
+  border-bottom: 1px solid rgba(55, 150, 218, 0.22);
+  background: rgba(3, 13, 25, 0.84);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.22);
+}
+
+.brand { gap: 12px; }
+.brand__mark {
+  width: 44px;
+  height: 44px;
+  color: #28d5ff;
+  filter: drop-shadow(0 0 10px rgba(36, 199, 255, 0.48));
+}
+.brand__title {
+  font-size: clamp(1.4rem, 2vw, 1.72rem);
+  letter-spacing: -0.035em;
+}
+.brand__subtitle { color: #70b8dd; }
+
+.header__ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  padding: 8px 13px;
+  border: 1px solid rgba(36, 199, 255, 0.25);
+  border-radius: 999px;
+  background: rgba(4, 28, 48, 0.66);
+  box-shadow: inset 0 0 18px rgba(36, 199, 255, 0.045), 0 0 24px rgba(36, 199, 255, 0.05);
+  color: #c9efff;
+}
+.header__ai-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #49e4a4;
+  box-shadow: 0 0 10px rgba(73, 228, 164, 0.8);
+}
+.header__ai-copy { display: grid; line-height: 1.15; }
+.header__ai-copy strong { font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.header__ai-copy span { margin-top: 3px; color: #6e9ab5; font-size: 0.66rem; }
+
+.status {
+  border-color: rgba(72, 155, 215, 0.25);
+  background: rgba(2, 12, 23, 0.62);
+  box-shadow: inset 0 0 16px rgba(36, 199, 255, 0.035);
+}
+
+/* Disclaimer */
+.disclaimer {
+  background: rgba(8, 24, 41, 0.78);
+  border-bottom-color: rgba(58, 145, 208, 0.18);
+  color: #dceaf4;
+}
+
+/* Main grid */
+.dashboard {
+  position: relative;
+  padding: clamp(14px, 2vw, 24px);
+  gap: 16px;
+}
+
+@media (min-width: 1100px) {
+  .dashboard {
+    grid-template-columns: minmax(0, 1fr) minmax(350px, 390px);
+  }
+}
+
+/* Glass panels */
+.panel {
+  position: relative;
+  background:
+    linear-gradient(145deg, rgba(12, 34, 56, 0.86), rgba(4, 16, 29, 0.88));
+  border: 1px solid rgba(61, 151, 218, 0.22);
+  border-radius: 17px;
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025),
+    inset 0 0 32px rgba(25, 160, 235, 0.025);
+  backdrop-filter: blur(14px);
+}
+
+.panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(45, 205, 255, 0.035), transparent 30%, transparent 70%, rgba(82, 85, 255, 0.025));
+}
+
+.panel__title { letter-spacing: -0.025em; }
+.panel__hint { color: #76a8c7; }
+
+/* 3D viewer — make it the hero */
+.viewer {
+  border-color: rgba(40, 190, 255, 0.3);
+  box-shadow:
+    0 22px 65px rgba(0, 0, 0, 0.32),
+    0 0 45px rgba(20, 154, 255, 0.07),
+    inset 0 0 45px rgba(20, 154, 255, 0.035);
+}
+
+.viewer__bar {
+  padding: 15px 18px;
+  background: linear-gradient(90deg, rgba(10, 34, 56, 0.78), rgba(7, 22, 38, 0.62));
+  border-bottom-color: rgba(62, 151, 215, 0.2);
+}
+
+.viewer__stage {
+  min-height: 390px;
+  height: clamp(390px, 57vh, 680px);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(24, 159, 255, 0.09), transparent 31%),
+    linear-gradient(rgba(38, 153, 218, 0.07) 1px, transparent 1px) 0 0 / 42px 42px,
+    linear-gradient(90deg, rgba(38, 153, 218, 0.07) 1px, transparent 1px) 0 0 / 42px 42px,
+    #020b14;
+}
+
+.viewer__stage::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  width: min(54%, 540px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(38, 198, 255, 0.17);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 38px rgba(38, 198, 255, 0.025),
+    0 0 0 80px rgba(38, 198, 255, 0.018),
+    0 0 55px rgba(38, 198, 255, 0.08);
+  pointer-events: none;
+}
+
+.viewer__stage::after {
+  content: "CARDIOVISION • LIVE RISK VISUALIZATION";
+  position: absolute;
+  left: 18px;
+  top: 16px;
+  z-index: 4;
+  padding: 7px 10px;
+  border: 1px solid rgba(36, 199, 255, 0.2);
+  border-radius: 7px;
+  background: rgba(2, 12, 22, 0.72);
+  color: #67b9dc;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+}
+
+.viewer__corner { border-color: #26caff; opacity: 0.75; }
+.heart-scene { background: transparent; }
+.viewer__model-badge,
+.viewer__controls-hint {
+  background: rgba(2, 13, 23, 0.72);
+  border-color: rgba(48, 171, 232, 0.24);
+  color: #8db8cf;
+  backdrop-filter: blur(10px);
+}
+
+/* Coronary overlay UI */
+.coronary-legend,
+.coronary-label {
+  background: rgba(4, 18, 31, 0.76);
+  border-color: rgba(55, 156, 219, 0.22);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 30px rgba(0,0,0,.22);
+}
+.coronary-legend { box-shadow: 0 0 30px rgba(36, 199, 255, 0.04); }
+.coronary-legend__title { color: #dff6ff; }
+.coronary-label:hover, .coronary-label.is-selected {
+  box-shadow: 0 0 20px color-mix(in srgb, var(--risk-color) 20%, transparent);
+}
+
+/* Risk summary */
+.risk-summary { gap: 10px; }
+.risk-summary__item {
+  padding: 12px 12px 11px;
+  border: 1px solid rgba(70, 151, 215, 0.12);
+  border-radius: 12px;
+  background: rgba(4, 16, 29, 0.56);
+  transition: transform .18s ease, border-color .18s ease;
+}
+.risk-summary__item:hover { transform: translateY(-1px); border-color: rgba(70, 180, 235, 0.25); }
+.risk-summary__top { gap: 10px; }
+.risk-summary__top > div { gap: 8px; }
+.risk-summary__percentage { font-size: 1.02rem; font-weight: 800; }
+.risk-summary__level { border: 1px solid rgba(255,255,255,.07); }
+.risk-summary__track { height: 7px; background: rgba(86, 126, 157, .16); }
+.risk-summary__fill { box-shadow: 0 0 12px color-mix(in srgb, currentColor 35%, transparent); }
+.risk-summary__fill--lower { background: #20d99a; color: #20d99a; }
+.risk-summary__fill--moderate { background: #ffb32e; color: #ffb32e; }
+.risk-summary__fill--high { background: #ff5363; color: #ff5363; }
+.risk-summary__highlight {
+  margin-top: 13px;
+  border: 1px solid rgba(36, 199, 255, 0.15);
+  background: linear-gradient(100deg, rgba(36, 199, 255, 0.07), rgba(76, 75, 255, 0.045));
+}
+
+/* Prediction cards */
+.prediction {
+  background: rgba(5, 19, 33, 0.62);
+  border-color: rgba(65, 151, 211, 0.15);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.prediction:hover {
+  transform: translateY(-1px);
+  border-color: rgba(65, 178, 230, 0.3);
+  box-shadow: 0 10px 25px rgba(0,0,0,.18);
+}
+.prediction--primary {
+  border-color: rgba(36, 199, 255, 0.34);
+  background: linear-gradient(120deg, rgba(18, 52, 78, .72), rgba(5, 19, 33, .62));
+}
+.prediction__result { color: #cbe9f8; }
+.prediction__fill { background: linear-gradient(90deg, #1bc6ff, #5f8cff); box-shadow: 0 0 12px rgba(36, 199, 255, .24); }
+
+/* Explainability */
+.explainability { margin-top: 0; }
+.explainability__target { background: rgba(3, 15, 27, .72); border-color: rgba(61, 145, 207, .2); }
+.explainability__target.is-active { border-color: #24c7ff; box-shadow: 0 0 15px rgba(36,199,255,.08); }
+.explainability__summary { background: rgba(4, 18, 31, .65); border-color: rgba(62, 151, 215, .17); }
+.impact { background: rgba(3, 14, 25, .62); border-color: rgba(62, 151, 215, .13); }
+
+/* Model performance */
+.model-performance__list { display: grid; gap: 10px; }
+.model-performance__card {
+  padding: 13px;
+  border: 1px solid rgba(62, 151, 215, .14);
+  border-radius: 12px;
+  background: rgba(3, 16, 29, .58);
+  transition: border-color .18s ease, transform .18s ease;
+}
+.model-performance__card:hover { transform: translateY(-1px); border-color: rgba(36,199,255,.25); }
+.model-performance__name { color: #dceffc; }
+.model-performance__metric strong { color: #d7f5ff; }
+
+/* Patient measurements */
+.dashboard__measurements,
+.measurements { border-color: rgba(57, 151, 219, .2); }
+.measure-group { padding: 14px; border: 1px solid rgba(61, 145, 207, .11); border-radius: 14px; background: rgba(3, 16, 29, .38); }
+.measure-group__title { color: #52d8ff; letter-spacing: .01em; }
+.field__label { color: #87a9bf; }
+.field__control {
+  min-height: 44px;
+  background: rgba(2, 12, 22, .76);
+  border-color: rgba(67, 145, 201, .2);
+  border-radius: 9px;
+  box-shadow: inset 0 0 18px rgba(0, 126, 190, .025);
+}
+.field__control:focus { border-color: rgba(36,199,255,.6); box-shadow: 0 0 0 3px rgba(36,199,255,.08); }
+.toggle { background: rgba(2, 12, 22, .64); border-color: rgba(67,145,201,.18); border-radius: 9px; }
+.button--primary {
+  background: linear-gradient(100deg, #16bff5, #4e83ff);
+  border-color: transparent;
+  box-shadow: 0 8px 25px rgba(31, 156, 255, .2);
+}
+.button--primary:hover:not(:disabled) { filter: brightness(1.08); box-shadow: 0 10px 30px rgba(31, 156, 255, .28); }
+
+/* System status */
+.status-list__item {
+  padding: 10px 12px;
+  border: 1px solid rgba(62,151,215,.11);
+  border-radius: 10px;
+  background: rgba(3, 16, 29, .42);
+}
+
+@media (max-width: 720px) {
+  .header__ai { display: none; }
+  .viewer__stage { min-height: 340px; height: 48vh; }
+  .viewer__stage::before { width: 72%; }
+}

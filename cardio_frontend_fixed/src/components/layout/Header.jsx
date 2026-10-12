@@ -1,6 +1,5 @@
 import StatusIndicator from "../status/StatusIndicator.jsx";
 
-// Simple original mark: a ring with a pulse line. It is a logo, not a heart model.
 function BrandMark() {
   return (
     <svg className="brand__mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
@@ -17,6 +16,8 @@ function BrandMark() {
 }
 
 export default function Header({ status }) {
+  const ready = status?.state === "ready";
+
   return (
     <header className="app-header">
       <div className="brand">
@@ -26,6 +27,15 @@ export default function Header({ status }) {
           <p className="brand__subtitle">Cardiovascular Risk Visualization &amp; Prediction</p>
         </div>
       </div>
+
+      <div className="header__ai" aria-label={ready ? "AI engine online" : "AI engine status"}>
+        <span className="header__ai-dot" />
+        <span className="header__ai-copy">
+          <strong>{ready ? "AI Engine Online" : "AI Engine Checking"}</strong>
+          <span>{ready ? "Models Ready · v1.0" : status?.detail || "Initializing services"}</span>
+        </span>
+      </div>
+
       <StatusIndicator state={status.state} detail={status.detail} />
     </header>
   );
