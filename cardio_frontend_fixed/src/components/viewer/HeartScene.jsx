@@ -689,7 +689,7 @@ function HeartRenderer({ onError, results = {}, selectedVessel = null }) {
 
         coronaryBuffers = makeCoronaryPaths(results).map((vessel) => {
           const probability = Number.isFinite(vessel.probability) ? vessel.probability : 0.35;
-          const width = 0.012 + probability * 0.014 + (selectedVessel === vessel.id ? 0.010 : 0);
+          const width = 0.024 + probability * 0.022 + (selectedVessel === vessel.id ? 0.018 : 0);
           const ribbon = buildRibbon(vessel.points, width);
           const colors = new Float32Array(ribbon.count * 4);
           for (let i = 0; i < ribbon.count; i += 1) colors.set(vessel.color, i * 4);
