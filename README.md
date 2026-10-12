@@ -1,626 +1,261 @@
-# 🫀 CardioVision
+# CardioVision
 
-### Cardiovascular Risk Visualization & Prediction
+**An AI-powered cardiovascular risk prediction and visualization platform**
 
-> An AI-powered cardiovascular risk visualization and decision-support prototype combining machine learning, interactive 3D anatomy, and patient-level explainability.
+CardioVision is a research prototype that combines machine learning with interactive 3D heart visualization to explore cardiovascular risk predictions. It analyzes patient-related clinical features and presents model outputs for coronary artery disease (CAD) and three coronary artery targets: LAD, LCX, and RCA.
 
----
+The goal is to make machine-learning predictions easier to explore and understand through a visual, interactive interface.
 
-## ✨ Key Features
+## Features
 
-### 🤖 Multi-Target Machine Learning
+* **Four prediction targets:** CAD, left anterior descending artery (LAD), left circumflex artery (LCX), and right coronary artery (RCA).
+* **Interactive 3D heart:** Explore a 3D anatomical heart model with rotation and zoom controls.
+* **Coronary risk visualization:** View predicted probabilities alongside color-coded coronary vessel overlays.
+* **Patient input dashboard:** Enter clinical features to generate predictions.
+* **Model evaluation:** Present classification metrics to help assess model performance.
+* **Explainability support:** Provide a foundation for exploring the factors behind model predictions.
+* **Research-focused design:** Communicate results alongside limitations and a medical disclaimer.
 
-CardioVision uses four independently trained classification models to estimate cardiovascular risk:
+## Technology Stack
 
-| Target | Description |
-|---|---|
-| ❤️ Overall CAD | Predicts the probability of coronary artery disease |
-| 🩸 LAD | Predicts LAD stenosis |
-| 🩸 LCX | Predicts LCX stenosis |
-| 🩸 RCA | Predicts RCA stenosis |
+**Frontend**
 
-Each model produces a positive-class probability.
+* React
+* Vite
+* JavaScript
+* WebGL 2 for 3D rendering
 
-> **Important:** A prediction such as `65.1%` represents the model's estimated probability of the positive class. It does **not** mean that 65.1% of the artery is blocked.
+**Backend**
 
-### 🫀 Interactive 3D Heart Visualization
+* Python
+* FastAPI
+* scikit-learn
+* NumPy, pandas, and joblib
 
-The dashboard connects model predictions with an interactive 3D heart interface.
+**Machine learning**
 
-**Interactions include:**
+* Classification models trained on clinical data
+* Separate prediction targets for CAD, LAD, LCX, and RCA
+* Evaluation using accuracy, precision, recall, F1-score, and ROC-AUC
 
-- 🔄 Rotate
-- 🔍 Zoom
-- 🖱️ Pan
-- 🩸 Visualize LAD / LCX / RCA risk
-- 📊 Display vessel probabilities
-- 📌 Select vessel risk information
-
-The coronary visualization is driven by model probabilities.
-
-| Probability | Risk Level |
-|---|---|
-| `< 40%` | Lower |
-| `40–69%` | Moderate |
-| `≥ 70%` | High |
-
-> ⚠️ The coronary layer is a **probability-driven visualization overlay**. It is not clinical-grade coronary vessel segmentation and must not be interpreted as diagnostic medical imaging.
-
-### 📊 Cardiovascular Risk Summary
-
-The dashboard provides a compact summary of the four model outputs and identifies the highest predicted vessel-specific risk.
-
-Example:
-
-```text
-Overall CAD     73.6%
-LAD             65.1%
-LCX             20.2%
-RCA             50.0%
-```
-
-### 🧠 Clinical Explainability
-
-CardioVision provides patient-level model explainability using a **model-agnostic local feature perturbation approach**.
-
-The dashboard can show:
-
-- 🔎 Important contributing features
-- 👤 Patient value
-- 📊 Reference value
-- 📈 Estimated probability impact
-- ⬆️ Features associated with increased predicted probability
-- ⬇️ Features associated with decreased predicted probability
-- 🎯 Separate explanations for CAD, LAD, LCX and RCA
-
-> The current production explanation panel does not use SHAP. It uses local feature perturbation because the development environment encountered a Windows-specific dependency restriction affecting SHAP.
-
-### 📈 Model Performance
-
-The dashboard displays held-out test-set metrics for all four models:
-
-- Accuracy
-- Precision
-- Recall
-- F1
-- ROC-AUC
-
----
-
-## 🔒 Target Leakage Prevention
-
-Target leakage is particularly important for this dataset because the angiographic labels directly describe the outcomes being predicted.
-
-CardioVision therefore excludes the angiographic target variables from the model input features.
-
-The target-related columns are:
-
-```text
-Cath
-LAD
-LCX
-RCA
-```
-
-These columns are excluded from the feature matrix for every prediction task.
-
-This prevents the models from receiving angiographic outcomes that would directly or indirectly reveal the answer.
-
----
-
-## 📚 Dataset
-
-### UCI Extension of the Z-Alizadeh Sani Dataset
-
-CardioVision uses the **UCI Extension of the Z-Alizadeh Sani Dataset**.
-
-The dataset contains:
-
-- 👥 303 patient records
-- 🧬 Demographic information
-- ❤️ Clinical measurements
-- 🩸 Laboratory measurements
-- 📈 ECG measurements
-- 🫀 Echocardiographic measurements
-- 🩻 CAD labels
-- 🩸 LAD labels
-- 🩸 LCX labels
-- 🩸 RCA labels
-
-The dataset provides clinical and physiological features for cardiovascular disease and vessel-specific stenosis classification.
-
----
-
-## 🧹 Data Preprocessing
-
-### Data Loading
-
-The primary dataset is loaded from the UCI-derived Excel dataset.
-
-### Data Cleaning
-
-The preprocessing pipeline handles:
-
-- Normalization of inconsistent categorical values
-- Correction of categorical spelling inconsistencies
-- Removal of unused features
-- Separation of target variables from model inputs
-- Feature and target dimension validation
-- Missing-value validation
-
-### Feature Preprocessing
-
-Numerical and categorical features are processed separately.
-
-**Numerical features:**
-
-```text
-StandardScaler
-```
-
-**Categorical features:**
-
-```text
-OneHotEncoder
-```
-
-The preprocessing pipeline is stored together with the trained models so inference uses the same transformations as training.
-
----
-
-## 🤖 Machine Learning Models
-
-The trained models are stored as serialized scikit-learn pipelines.
-
-| Target | Selected Model |
-|---|---|
-| ❤️ Overall CAD | Random Forest |
-| 🩸 LAD | Random Forest |
-| 🩸 LCX | Random Forest |
-| 🩸 RCA | Support Vector Machine |
-
-The models are loaded by the FastAPI backend and used to generate predictions from patient measurements.
-
----
-
-## 📈 Model Performance
-
-The current models were evaluated on a held-out test set.
-
-| Target | Accuracy | Precision | Recall | F1 | ROC-AUC |
-|---|---:|---:|---:|---:|---:|
-| ❤️ Overall CAD | 85.25% | 88.64% | 90.70% | 89.66% | 87.60% |
-| 🩸 LAD | 78.69% | 79.49% | 86.11% | 82.67% | 84.33% |
-| 🩸 LCX | 63.93% | 54.17% | 54.17% | 54.17% | 73.42% |
-| 🩸 RCA | 67.21% | 55.56% | 65.22% | 60.00% | 73.57% |
-
-### Performance Interpretation
-
-The results show stronger predictive performance for overall CAD and LAD, while LCX and RCA are more challenging classification tasks.
-
-The project reports these results transparently rather than presenting only the strongest-performing target.
-
-> ⚠️ These metrics are dataset-specific evaluation results. They do not constitute clinical validation or demonstrate clinical deployment readiness.
-
----
-
-## 🏗️ System Architecture
-
-```text
-                         👤 Patient
-                            │
-                            ▼
-                 📋 Clinical Measurements
-                            │
-                            ▼
-                   🧹 Preprocessing
-                            │
-                            ▼
-                  🔒 Leakage Prevention
-                            │
-                            ▼
-                    🤖 ML Pipelines
-                            │
-             ┌──────────────┼──────────────┐
-             │              │              │
-             ▼              ▼              ▼
-           ❤️ CAD         🩸 LAD        🩸 LCX / RCA
-             │              │              │
-             └──────────────┼──────────────┘
-                            │
-                            ▼
-                    📊 Probabilities
-                            │
-              ┌─────────────┼─────────────┐
-              │             │             │
-              ▼             ▼             ▼
-        🫀 3D Risk Map  🧠 Explainability  📈 Metrics
-              │             │             │
-              └─────────────┼─────────────┘
-                            ▼
-                   🖥️ CardioVision UI
-```
-
----
-
-## 🔌 Backend Architecture
-
-The backend is implemented using **FastAPI**.
-
-It handles:
-
-- ❤️ Health checks
-- 📊 Prediction requests
-- 🧠 Explainability requests
-- 🤖 Model loading
-- 🧹 Input preparation
-- 🔒 Target leakage protection
-
-### API Flow
-
-```text
-React Frontend
-      │
-      │ Patient measurements
-      ▼
-FastAPI
-      │
-      ▼
-Prediction Service
-      │
-      ├── CAD model
-      ├── LAD model
-      ├── LCX model
-      └── RCA model
-      │
-      ▼
-Prediction probabilities
-      │
-      ▼
-React Dashboard
-```
-
----
-
-## ⚛️ Frontend Architecture
-
-The frontend is built with:
-
-- React
-- Vite
-- JavaScript
-- CSS
-- WebGL / Three.js-based visualization
-
-Major UI areas include:
-
-```text
-components/
-├── explainability/
-├── layout/
-├── patient/
-├── predictions/
-├── status/
-└── viewer/
-```
-
-The dashboard is modular so prediction, visualization, patient data, system status, and explainability can operate as separate components.
-
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```text
 CardioVision/
-│
 ├── backend/
 │   ├── app/
 │   │   ├── api/
+│   │   ├── core/
 │   │   ├── ml/
-│   │   └── services/
-│   │
-│   ├── data/
+│   │   ├── models/
+│   │   ├── schemas/
+│   │   ├── services/
+│   │   └── main.py
 │   ├── notebooks/
 │   ├── saved_models/
-│   ├── tests/
 │   └── requirements.txt
 │
 ├── cardio_frontend_fixed/
 │   ├── public/
 │   │   └── models/
 │   │       └── VH_M_Heart.glb
-│   │
 │   ├── src/
-│   │   ├── components/
-│   │   │   ├── explainability/
-│   │   │   ├── layout/
-│   │   │   ├── patient/
-│   │   │   ├── predictions/
-│   │   │   ├── status/
-│   │   │   └── viewer/
-│   │   │
-│   │   ├── hooks/
-│   │   ├── services/
-│   │   └── styles/
-│   │
 │   ├── package.json
 │   └── vite.config.js
 │
-├── .gitignore
 └── README.md
 ```
 
----
+*The exact contents may vary as development continues.*
 
-## 🛠️ Technology Stack
+## Dataset
 
-### 🐍 Backend
+CardioVision uses the Extension of Z-Alizadeh Sani dataset for cardiovascular machine-learning experiments.
 
-- Python
-- FastAPI
-- pandas
-- NumPy
-- scikit-learn
-- joblib
-- openpyxl
+* **Source:** [UCI Machine Learning Repository — Extension of Z-Alizadeh Sani Dataset](https://archive.ics.uci.edu/dataset/411/extention+z+)
+* **Dataset size:** 303 patient records.
+* **Prediction targets:** Cath, LAD, LCX, and RCA.
 
-### ⚛️ Frontend
+The dataset is intended for research and educational use. Model performance on this small dataset does not establish clinical reliability or generalization to other patient populations.
 
-- React
-- Vite
-- JavaScript
-- CSS
-- WebGL / Three.js
+## Installation and Setup
 
-### 🔧 Development
+### Prerequisites
 
-- Git
-- GitHub
-- VS Code
-- PowerShell
+* Python 3.10 or newer
+* Node.js and npm
+* Git
+* Windows PowerShell or another compatible terminal
 
----
+### 1. Clone the repository
 
-## ▶️ Installation & Setup
+```powershell
+git clone https://github.com/vksaini15/CardioVision
+cd CardioVision
+```
 
-### Requirements
+Replace the placeholder with your repository's actual URL.
 
-Before starting, install:
+### 2. Start the backend
 
-- 🐍 Python 3.10+
-- 📦 pip
-- 🟢 Node.js 18+
-- 📦 npm
-- 💻 Git
+Open a terminal in the project root and run the following commands **in this order**.
 
-> The commands below assume the repository has already been cloned or downloaded.
-
-### 🐍 Backend Setup
-
-Open PowerShell in the project folder:
+**Step 1 — Enter the backend folder**
 
 ```powershell
 cd backend
+```
+
+**Step 2 — Activate the virtual environment**
+
+If the `.venv` folder already exists:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+If it does not exist, create it first:
+
+```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+```
+
+**Step 3 — Upgrade pip**
+
+```powershell
 python -m pip install --upgrade pip
+```
+
+**Step 4 — Install project dependencies**
+
+```powershell
 pip install -r requirements.txt
-uvicorn app.main:app --reload
 ```
 
-The backend runs at:
+**Step 5 — Check the scikit-learn import**
 
-```text
-http://localhost:8000
+```powershell
+python -c "import sklearn; print(sklearn.__version__)"
 ```
 
-FastAPI documentation:
+**Step 6 — Check the joblib import**
 
-```text
-http://localhost:8000/docs
+```powershell
+python -c "import joblib; print(joblib.__version__)"
 ```
 
-Health endpoint:
+**Step 7 — Reinstall scikit-learn if the import or binary installation is broken**
 
-```text
-http://localhost:8000/health
+Run these only when needed to repair the installation:
+
+```powershell
+pip uninstall -y scikit-learn
+pip install scikit-learn
 ```
 
-### ⚛️ Frontend Setup
+**Step 8 — Verify scikit-learn again**
 
-Open a second PowerShell window:
+```powershell
+python -c "import sklearn; print(sklearn.__version__)"
+```
+
+**Step 9 — Verify joblib again**
+
+```powershell
+python -c "import joblib; print(joblib.__version__)"
+```
+
+**Step 10 — Start FastAPI**
+
+```powershell
+python -m uvicorn app.main:app --reload
+```
+
+The `python -m uvicorn` form is used instead of invoking the `uvicorn` executable directly.
+
+When the server starts successfully, open:
+
+* API documentation: http://127.0.0.1:8000/docs
+* API root: http://127.0.0.1:8000/
+
+The API root may not provide a webpage; use `/docs` to explore the available endpoints.
+
+**Important Windows note:** If Windows Application Control blocks a scikit-learn native DLL, reinstalling packages may not resolve the policy restriction. Do not bypass your system's security policy. The backend must successfully import the required models before its predictions can be considered operational.
+
+### 3. Start the frontend
+
+Keep the backend terminal running. Open a **second PowerShell terminal** and navigate to the project root.
 
 ```powershell
 cd cardio_frontend_fixed
+```
+
+Install frontend dependencies:
+
+```powershell
 npm install
+```
+
+Start the development server:
+
+```powershell
 npm run dev
 ```
 
-The frontend normally runs at:
+Open the local URL printed by Vite in your terminal, commonly:
 
-```text
-http://localhost:5173
-```
+http://localhost:5173/
 
----
+Keep both terminals running while testing the application.
 
-## 🧪 Quick Demo
+## Model Evaluation
 
-### 1️⃣ Start the Backend
+The models have been evaluated using classification metrics. The following are previously recorded test-set results; they should be reproduced and verified before being presented as final benchmark results.
 
-Run:
+| Target     | Accuracy | Precision | Recall | F1-score | ROC-AUC |
+| ---------- | -------: | --------: | -----: | -------: | ------: |
+| CAD (Cath) |   85.25% |    88.64% | 90.70% |   89.66% |  87.60% |
+| LAD        |   78.69% |    79.49% | 86.11% |   82.67% |  84.33% |
+| LCX        |   63.93% |    54.17% | 54.17% |   54.17% |  73.42% |
+| RCA        |   67.21% |    55.56% | 65.22% |   60.00% |  73.57% |
 
-```powershell
-cd backend
-.\.venv\Scripts\Activate.ps1
-uvicorn app.main:app --reload
-```
+Performance varies by prediction target. In particular, the LCX and RCA results show that accuracy alone is insufficient to establish dependable predictions.
 
-### 2️⃣ Start the Frontend
+These values are historical experiment results, not a guarantee that the currently running application is loading the same models or reproducing those metrics.
 
-In a second terminal:
+## Important Limitations
 
-```powershell
-cd cardio_frontend_fixed
-npm run dev
-```
+* This is an experimental machine-learning project, not a clinically validated diagnostic system.
+* Predicted probabilities are model outputs; they are **not percentages of physical artery blockage**.
+* Predictions must not be used to diagnose disease, determine treatment, or replace professional medical assessment.
+* The dataset contains only 303 records, which limits the strength of conclusions about generalization.
+* Results may be affected by class imbalance, data quality, model selection, and evaluation methodology.
+* The 3D coronary overlays are approximate visual representations unless separately validated anatomical meshes are successfully integrated.
+* Feature explanations describe model behavior and do not establish medical causation.
 
-### 3️⃣ Open CardioVision
+## Ethical Use and Medical Disclaimer
 
-Open the frontend URL shown by Vite.
+CardioVision is intended for educational, research, and demonstration purposes only. It is not intended for clinical diagnosis, treatment decisions, or emergency medical use.
 
-### 4️⃣ Load the Demo Patient
+All displayed results should be interpreted with appropriate caution. A qualified healthcare professional should evaluate real medical concerns.
 
-Use the built-in demo patient functionality to populate a complete patient record.
+## Future Improvements
 
-### 5️⃣ Run Prediction
+* Improve anatomical alignment of the coronary artery meshes.
+* Add a one-click sample patient for demonstrations.
+* Improve interactive vessel selection and highlighting.
+* Add verified feature-contribution explanations.
+* Strengthen data validation and model evaluation.
+* Improve accessibility, testing, and documentation.
 
-Click the prediction button.
+## Acknowledgements
 
-The measurements are sent to the FastAPI backend and processed by the four trained models.
+* **Dataset:** Extension of Z-Alizadeh Sani, available through the [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/411/extention+z+).
+* **Anatomical model:** VH_M_Heart.glb and any separately integrated BodyParts3D assets should be attributed according to their respective source and license terms.
 
-### 6️⃣ Explore the Risk Summary
-
-Inspect:
-
-- ❤️ Overall CAD
-- 🩸 LAD
-- 🩸 LCX
-- 🩸 RCA
-- 📊 Highest predicted vessel risk
-
-### 7️⃣ Explore the 3D Heart
-
-Interact with the model:
-
-- 🔄 Rotate
-- 🔍 Zoom
-- 🖱️ Pan
-- 🩸 Inspect coronary risk visualization
-
-### 8️⃣ Explore Explainability
-
-Switch between:
-
-- Overall CAD
-- LAD
-- LCX
-- RCA
-
-to inspect patient-level model sensitivity.
-
-### 9️⃣ Inspect Model Performance
-
-Review:
-
-- Accuracy
-- Precision
-- Recall
-- F1
-- ROC-AUC
-
-for every target.
+For BodyParts3D assets, consult the [official download page](https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html) and [license information](https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html). Confirm the license for the specific downloaded version before redistribution.
 
 ---
 
-## 🔬 Current Limitations
-
-### Dataset Size
-
-The primary dataset contains only 303 records.
-
-### External Validation
-
-The current models have not undergone external clinical validation.
-
-### Probability Calibration
-
-Probability calibration has not been established for clinical use.
-
-### Anatomical Visualization
-
-The coronary visualization is a probability-driven overlay rather than a validated patient-specific coronary reconstruction.
-
-### Explainability
-
-The local perturbation method estimates model sensitivity. It should not be interpreted as a causal medical explanation.
-
-### Clinical Deployment
-
-The system is a research and hackathon prototype and is not intended for clinical deployment.
-
----
-
-## 🚀 Future Work
-
-Potential future improvements include:
-
-- 🧪 Larger and more diverse datasets
-- 🏥 External clinical validation
-- 📈 Probability calibration
-- 🔬 Confidence intervals
-- 🧠 Advanced explainability methods
-- 🫀 Anatomically validated coronary vessel geometry
-- 🩻 Patient-specific medical imaging integration
-- 🌐 Multi-patient analytics
-- 📱 Improved responsive design
-- 🔐 Production-grade security
-- ☁️ Deployment infrastructure
-
----
-
-## 🏆 Hackathon Alignment
-
-### Multimodal AI Hackathon 2026
-
-**Track A — Cardiovascular Risk Visualization & Prediction**
-
-| Requirement | CardioVision |
-|---|---|
-| Overall CAD prediction | ✅ |
-| LAD prediction | ✅ |
-| LCX prediction | ✅ |
-| RCA prediction | ✅ |
-| Clinical / physiological features | ✅ |
-| Target leakage prevention | ✅ |
-| Accuracy / Precision / Recall / F1 / ROC-AUC | ✅ |
-| Interactive 3D visualization | ✅ |
-| Vessel risk visualization | ✅ |
-| Patient-level explainability | ✅ |
-| Clinical dashboard | ✅ |
-| Medical safety disclaimer | ✅ |
-| Working web application | ✅ |
-
----
-
-## 🛡️ Medical Safety Disclaimer
-
-> ⚠️ **Educational and decision-support tool. Not a substitute for formal diagnostic imaging or professional medical evaluation.**
-
-CardioVision is a research and hackathon prototype.
-
-Its predictions must not be used as a standalone medical diagnosis, treatment recommendation, or replacement for professional clinical assessment.
-
----
-
-## 🎯 Project Philosophy
-
-### 🫀 Predict
-
-Use machine learning to estimate cardiovascular risk from available clinical measurements.
-
-### 🧠 Explain
-
-Show which patient features are locally associated with changes in the model's prediction.
-
-### 🎨 Visualize
-
-Connect those predictions to an interactive 3D anatomical interface.
-
----
-
-## ❤️ Final Note
-
-CardioVision demonstrates how machine learning, interactive visualization, and explainability can be combined into a single cardiovascular decision-support prototype.
-
-> **Predict. Explain. Visualize.** 🫀🤖🧠
+**CardioVision — Making cardiovascular machine-learning predictions easier to explore, visualize, and understand.**
