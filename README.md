@@ -243,7 +243,6 @@ All displayed results should be interpreted with appropriate caution. A qualifie
 ## Future Improvements
 
 * Improve anatomical alignment of the coronary artery meshes.
-* Add a one-click sample patient for demonstrations.
 * Improve interactive vessel selection and highlighting.
 * Add verified feature-contribution explanations.
 * Strengthen data validation and model evaluation.
