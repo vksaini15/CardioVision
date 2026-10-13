@@ -12,6 +12,7 @@ import ExplainabilityPanel from "./components/explainability/ExplainabilityPanel
 import { summarizeStatus } from "./components/status/systemStatus.js";
 import { usePatientMeasurements } from "./hooks/usePatientMeasurements.js";
 import { checkHealth, predictPatient, explainPatient } from "./services/predictionApi.js";
+import LandingPage from "./LandingPage";
 
 
 
@@ -109,6 +110,7 @@ export default function App() {
   const [predictionError, setPredictionError] = useState("");
   const [results, setResults] = useState({});
   const [explanationTarget, setExplanationTarget] = useState("Cath");
+  const [showDashboard, setShowDashboard] = useState(false);
   const [explanationState, setExplanationState] = useState("standby");
   const [explanation, setExplanation] = useState(null);
   const [explanationError, setExplanationError] = useState("");
@@ -194,6 +196,13 @@ export default function App() {
   ], [serviceDetail, serviceState]);
 
   const overall = useMemo(() => summarizeStatus(systemStatus), [systemStatus]);
+  if (!showDashboard) {
+  return (
+    <LandingPage
+      onGetStarted={() => setShowDashboard(true)}
+    />
+  );
+}
 
   return (
     <div className="app-shell">
@@ -227,7 +236,12 @@ export default function App() {
           predictionError={predictionError}
           onPredict={runPrediction}
         />
+        <div className="cv-creator-credit">
+  Built by <strong>VK Saini</strong>
+</div>
       </main>
     </div>
   );
 }
+
+
