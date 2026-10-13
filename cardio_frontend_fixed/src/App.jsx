@@ -13,23 +13,68 @@ import { summarizeStatus } from "./components/status/systemStatus.js";
 import { usePatientMeasurements } from "./hooks/usePatientMeasurements.js";
 import { checkHealth, predictPatient, explainPatient } from "./services/predictionApi.js";
 
+
+
+
+
+const NUMERIC_FIELDS = new Set([
+  "Age", "Weight", "Length", "BMI", "DM", "HTN",
+  "Current Smoker", "EX-Smoker", "FH", "BP", "PR",
+  "Edema", "Typical Chest Pain", "Function Class",
+  "Q Wave", "St Elevation", "St Depression", "Tinversion",
+  "FBS", "CR", "TG", "LDL", "HDL", "BUN", "ESR",
+  "HB", "K", "Na", "WBC", "Lymph", "Neut", "PLT",
+  "EF-TTE", "Region RWMA",
+]);
+
 function buildPayload(values, bmi) {
   const payload = {};
 
   for (const [key, value] of Object.entries(values)) {
-    if (value === "") continue;
-    if (key === "Length" || key === "Weight") {
-      payload[key] = Number(value);
-    } else if (["Age", "BP", "PR", "FBS", "CR", "TG", "LDL", "HDL", "BUN", "ESR", "HB", "K", "Na", "WBC", "Lymph", "Neut", "PLT", "EF-TTE", "Region RWMA"].includes(key)) {
-      payload[key] = Number(value);
-    } else {
+    if (value === "" || value == null) continue;
+
+    if (!NUMERIC_FIELDS.has(key)) {
       payload[key] = value;
+      continue;
+    }
+
+    if (key === "Function Class") {
+  const normalized = String(value).trim().toUpperCase();
+
+  if (["0", "I", "II", "III", "IV"].includes(normalized)) {
+    payload[key] = normalized === "0"
+      ? 0
+      : { I: 1, II: 2, III: 3, IV: 4 }[normalized];
+  } else {
+    throw new Error(`Invalid Function Class value: "${value}"`);
+  }
+
+  continue;
+}
+
+    const normalized = String(value).trim().toUpperCase();
+
+    if (normalized === "Y" || normalized === "YES") {
+      payload[key] = 1;
+    } else if (normalized === "N" || normalized === "NO") {
+      payload[key] = 0;
+    } else {
+      const numberValue = Number(value);
+
+      if (!Number.isFinite(numberValue)) {
+        throw new Error(`Invalid numeric value for ${key}: "${value}"`);
+      }
+
+      payload[key] = numberValue;
     }
   }
 
   payload.BMI = Number(bmi);
   return payload;
 }
+
+
+
 
 
 const DEMO_PATIENT = {
@@ -43,7 +88,7 @@ const DEMO_PATIENT = {
   Tinversion: 1, LVH: "N", "Poor R Progression": "N", BBB: "N", FBS: 90,
   CR: 0.7, TG: 250, LDL: 155, HDL: 30, BUN: 8, ESR: 7, HB: 15.6, K: 4.7,
   Na: 141, WBC: 5700, Lymph: 39, Neut: 52, PLT: 261, "EF-TTE": 50,
-  "Region RWMA": 0, VHD: "N",
+  "Region RWMA": 0, VHD: "None",
 };
 
 function mapPrediction(raw) {
